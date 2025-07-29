@@ -1,0 +1,20 @@
+local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
+
+local Window = Rayfield:CreateWindow({
+    Name = "skyyscripts",
+    LoadingTitle = "Chargement...",
+    LoadingSubtitle = "Par TonNom",
+    ConfigurationSaving = {
+        Enabled = false,
+    },
+    KeySystem = true,
+    KeySettings = {
+        Title = "Système de Clé",
+        Subtitle = "Entre ta clé pour continuer",
+        Note = "Demande la clé sur Discord https://discord.gg/nqqvS7hR",
+        FileName = "clelocale", -- le fichier de sauvegarde local
+        SaveKey = true,         -- enregistre la clé si elle est bonne
+        GrabKeyFromSite = false, -- désactivé pour clé fixe
+        Key = "https://pastebin.com/raw/mU6kTETd" -- 🟢 ta clé ici
+    }
+})
