@@ -12,9 +12,158 @@ local Window = Rayfield:CreateWindow({
         Title = "Système de Clé",
         Subtitle = "Entre ta clé pour continuer",
         Note = "Demande la clé sur Discord https://discord.gg/nqqvS7hR",
-        FileName = "clelocale", -- le fichier de sauvegarde local
-        SaveKey = true,         -- enregistre la clé si elle est bonne
-        GrabKeyFromSite = false, -- désactivé pour clé fixe
-        Key = "https://pastebin.com/raw/mU6kTETd" -- 🟢 ta clé ici
+        FileName = "clelocale",
+        SaveKey = true,
+        GrabKeyFromSite = true,
+        Key = "s"
     }
 })
+
+-- ✅ Création des catégories (tabs)
+local mainTab = Window:CreateTab("Main", 4483362458)
+local bringTab = Window:CreateTab("Bring Items", 4483362458)
+local autoTab = Window:CreateTab("Auto", 4483362458)
+local visualsTab = Window:CreateTab("Visuals", 4483362458)
+local tpTab = Window:CreateTab("Teleport", 4483362458)
+local settingsTab = Window:CreateTab("Settings", 4483362458)
+
+-- 🎯 MAIN
+mainTab:CreateButton({
+    Name = "🔥 TP to Campfire",
+    Callback = function()
+        game.Players.LocalPlayer.Character:MoveTo(Vector3.new(2.026, 4, 9.497))
+    end
+})
+
+-- 🔁 Auto-TP quand la vie est basse
+local autoTPEnabled = false
+local healthCheckConnection
+local debugAirborneConnection
+
+-- Auto-Save toggle déjà présent, je l'adapte un peu pour gérer le debug :
+mainTab:CreateToggle({
+    Name = "🛡️Autov (auto tp to campfire if low hp)",
+    CurrentValue = false,
+    Callback = function(state)
+        autoTPEnabled = state
+        if autoTPEnabled then
+            healthCheckConnection = game:GetService("RunService").Heartbeat:Connect(function()
+                local character = game.Players.LocalPlayer.Character
+                if character and character:FindFirstChild("Humanoid") then
+                    local health = character.Humanoid.Health
+                    if health > 0 and health <= 20 then -- seuil de santé
+                        character:MoveTo(Vector3.new(0, 10, 0)) -- Coordonnées du camp
+                    end
+                end
+            end)
+
+            -- Arrêter debug si il tournait déjà
+            if debugAirborneConnection then
+                debugAirborneConnection:Disconnect()
+                debugAirborneConnection = nil
+            end
+
+        else
+            if healthCheckConnection then
+                healthCheckConnection:Disconnect()
+                healthCheckConnection = nil
+            end
+
+            -- Lancer debug automatique pour éviter de "voler"
+            debugAirborneConnection = game:GetService("RunService").Heartbeat:Connect(function()
+                local character = game.Players.LocalPlayer.Character
+                if character and character:FindFirstChild("HumanoidRootPart") and character:FindFirstChild("Humanoid") then
+                    local root = character.HumanoidRootPart
+                    local humanoid = character.Humanoid
+
+                    -- Vérifier si la vélocité verticale est proche de zéro ou négative (en chute ou immobile)
+                    local verticalVelocity = root.Velocity.Y
+
+                    -- Check si en l'air (pas de toucher au sol)
+                    if humanoid.FloorMaterial == Enum.Material.Air then
+                        -- Si tu es en l'air depuis plus de 1 seconde, téléporte au sol (ex: y = 5)
+                        -- Pour simplifier on téléporte direct ici
+                        root.CFrame = CFrame.new(root.Position.X, 5, root.Position.Z)
+                    end
+                end
+            end)
+        end
+    end
+})
+
+
+
+
+
+
+
+-- 📦 BRING ITEMS
+bringTab:CreateButton({
+    Name = "🍔 Bring Food (sorry for the freeze)",
+    Callback = function()
+        local player = game.Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        local root = character:FindFirstChild("HumanoidRootPart")
+
+        if not root then return end
+
+        -- Liste des mots-clés pour reconnaître la nourriture
+        local foodKeywords = {"carrot", "meat", "berry", "pepper", "food", "apple", "fruit", "mushroom", "grape", "banana"}
+
+        -- Parcours tous les objets dans le jeu
+        for _, v in pairs(workspace:GetDescendants()) do
+            if v:IsA("Tool") or v:IsA("Model") or v:IsA("Part") then
+                local name = string.lower(v.Name)
+                for _, keyword in pairs(foodKeywords) do
+                    if string.find(name, keyword) then
+                        -- Si l'objet a un PrimaryPart (Model) on le TP via ça
+                        if v:IsA("Model") and v.PrimaryPart then
+                            v:SetPrimaryPartCFrame(root.CFrame + Vector3.new(0, 1, 0))
+                        elseif v:IsA("BasePart") then
+                            v.CFrame = root.CFrame + Vector3.new(0, 1, 0)
+                        elseif v:IsA("Tool") then
+                            v.Handle.CFrame = root.CFrame + Vector3.new(0, 1, 0)
+                        end
+                        break
+                    end
+                end
+            end
+        end
+    end
+})
+
+
+
+
+-- ⚙️ AUTO
+autoTab:CreateToggle({
+    Name = "Auto-Farm ON/OFF",
+    CurrentValue = false,
+    Callback = function(state)
+        if state then
+            -- Activer auto-farm
+        else
+            -- Désactiver auto-farm
+        end
+    end
+})
+
+-- 👁️ VISUALS
+visualsTab:CreateButton({
+    Name = "Activer ESP",
+    Callback = function()
+        -- code ESP
+    end
+})
+
+-- 🚀 TELEPORT
+tpTab:CreateButton({
+    Name = "TP au Camp",
+    Callback = function()
+        game.Players.LocalPlayer.Character:MoveTo(Vector3.new(0, 10, 0)) -- exemple
+    end
+})
+
+-- ⚙️ SETTINGS
+settingsTab:CreateLabel("Développeur : skyy")
+settingsTab:CreateLabel("Discord : https://discord.gg/WjxVK9bm7Z")
