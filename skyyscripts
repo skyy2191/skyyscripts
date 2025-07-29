@@ -15,7 +15,7 @@ local Window = Rayfield:CreateWindow({
         FileName = "clelocale",
         SaveKey = true,
         GrabKeyFromSite = true,
-        Key = "s"
+        Key = "https://pastebin.com/raw/mU6kTETd"
     }
 })
 
